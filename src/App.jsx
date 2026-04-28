@@ -2,29 +2,14 @@ import { useState, useEffect } from "react";
 import {
   RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
   ResponsiveContainer, Tooltip, LineChart, Line, XAxis, YAxis,
-  CartesianGrid, Legend,
+  CartesianGrid, Legend
 } from "recharts";
+import { createClient } from "@supabase/supabase-js";
 
-const SUPABASE_URL = "https://grjmnkbfqxjflmpmiahd.supabase.co";
-const SUPABASE_KEY = "sb_publishable_bHQ9T29gSCwH_7hxHHp0Lw_iGEQg1yc";
-
-const api = async (path, method = "GET", body = null) => {
-  const headers = {
-    "apikey": SUPABASE_KEY,
-    "Authorization": `Bearer ${SUPABASE_KEY}`,
-    "Content-Type": "application/json",
-  };
-  if (method === "POST" || method === "PATCH") {
-    headers["Prefer"] = "return=representation";
-  }
-  const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
-    method, headers,
-    body: body ? JSON.stringify(body) : undefined,
-  });
-  if (!res.ok) throw new Error(`${res.status}: ${await res.text()}`);
-  const text = await res.text();
-  return text ? JSON.parse(text) : null;
-};
+const supabase = createClient(
+  import.meta.env.VITE_SUPABASE_URL,
+  import.meta.env.VITE_SUPABASE_KEY
+);
 
 const initialStudents = [
   "신고","켄토","이노우에","레나","아스카","유미","시오리","에리","유유",
@@ -32,22 +17,22 @@ const initialStudents = [
 ];
 
 const colorPalette = [
-  { stroke: "#3b82f6", fill: "#3b82f6", bg: "from-blue-50 to-sky-100",       badge: "bg-blue-100 text-blue-700" },
-  { stroke: "#10b981", fill: "#10b981", bg: "from-emerald-50 to-teal-100",   badge: "bg-emerald-100 text-emerald-700" },
-  { stroke: "#f59e0b", fill: "#f59e0b", bg: "from-amber-50 to-yellow-100",   badge: "bg-amber-100 text-amber-700" },
-  { stroke: "#ec4899", fill: "#ec4899", bg: "from-pink-50 to-rose-100",      badge: "bg-pink-100 text-pink-700" },
-  { stroke: "#8b5cf6", fill: "#8b5cf6", bg: "from-violet-50 to-purple-100",  badge: "bg-violet-100 text-violet-700" },
-  { stroke: "#ef4444", fill: "#ef4444", bg: "from-red-50 to-orange-100",     badge: "bg-red-100 text-red-700" },
-  { stroke: "#06b6d4", fill: "#06b6d4", bg: "from-cyan-50 to-sky-100",       badge: "bg-cyan-100 text-cyan-700" },
-  { stroke: "#f97316", fill: "#f97316", bg: "from-orange-50 to-amber-100",   badge: "bg-orange-100 text-orange-700" },
-  { stroke: "#84cc16", fill: "#84cc16", bg: "from-lime-50 to-green-100",     badge: "bg-lime-100 text-lime-700" },
-  { stroke: "#6366f1", fill: "#6366f1", bg: "from-indigo-50 to-blue-100",    badge: "bg-indigo-100 text-indigo-700" },
-  { stroke: "#d946ef", fill: "#d946ef", bg: "from-fuchsia-50 to-pink-100",   badge: "bg-fuchsia-100 text-fuchsia-700" },
-  { stroke: "#0ea5e9", fill: "#0ea5e9", bg: "from-sky-50 to-blue-100",       badge: "bg-sky-100 text-sky-700" },
-  { stroke: "#14b8a6", fill: "#14b8a6", bg: "from-teal-50 to-emerald-100",   badge: "bg-teal-100 text-teal-700" },
-  { stroke: "#e879f9", fill: "#e879f9", bg: "from-pink-50 to-fuchsia-100",   badge: "bg-pink-100 text-pink-700" },
-  { stroke: "#fb7185", fill: "#fb7185", bg: "from-rose-50 to-pink-100",      badge: "bg-rose-100 text-rose-700" },
-  { stroke: "#a78bfa", fill: "#a78bfa", bg: "from-purple-50 to-violet-100",  badge: "bg-purple-100 text-purple-700" },
+  { stroke: "#3b82f6", fill: "#3b82f6", bg: "from-blue-50 to-sky-100",        badge: "bg-blue-100 text-blue-700" },
+  { stroke: "#10b981", fill: "#10b981", bg: "from-emerald-50 to-teal-100",    badge: "bg-emerald-100 text-emerald-700" },
+  { stroke: "#f59e0b", fill: "#f59e0b", bg: "from-amber-50 to-yellow-100",    badge: "bg-amber-100 text-amber-700" },
+  { stroke: "#ec4899", fill: "#ec4899", bg: "from-pink-50 to-rose-100",       badge: "bg-pink-100 text-pink-700" },
+  { stroke: "#8b5cf6", fill: "#8b5cf6", bg: "from-violet-50 to-purple-100",   badge: "bg-violet-100 text-violet-700" },
+  { stroke: "#ef4444", fill: "#ef4444", bg: "from-red-50 to-orange-100",      badge: "bg-red-100 text-red-700" },
+  { stroke: "#06b6d4", fill: "#06b6d4", bg: "from-cyan-50 to-sky-100",        badge: "bg-cyan-100 text-cyan-700" },
+  { stroke: "#f97316", fill: "#f97316", bg: "from-orange-50 to-amber-100",    badge: "bg-orange-100 text-orange-700" },
+  { stroke: "#84cc16", fill: "#84cc16", bg: "from-lime-50 to-green-100",      badge: "bg-lime-100 text-lime-700" },
+  { stroke: "#6366f1", fill: "#6366f1", bg: "from-indigo-50 to-blue-100",     badge: "bg-indigo-100 text-indigo-700" },
+  { stroke: "#d946ef", fill: "#d946ef", bg: "from-fuchsia-50 to-pink-100",    badge: "bg-fuchsia-100 text-fuchsia-700" },
+  { stroke: "#0ea5e9", fill: "#0ea5e9", bg: "from-sky-50 to-blue-100",        badge: "bg-sky-100 text-sky-700" },
+  { stroke: "#14b8a6", fill: "#14b8a6", bg: "from-teal-50 to-emerald-100",    badge: "bg-teal-100 text-teal-700" },
+  { stroke: "#e879f9", fill: "#e879f9", bg: "from-pink-50 to-fuchsia-100",    badge: "bg-pink-100 text-pink-700" },
+  { stroke: "#fb7185", fill: "#fb7185", bg: "from-rose-50 to-pink-100",       badge: "bg-rose-100 text-rose-700" },
+  { stroke: "#a78bfa", fill: "#a78bfa", bg: "from-purple-50 to-violet-100",   badge: "bg-purple-100 text-purple-700" },
 ];
 
 const categories = [
@@ -58,28 +43,35 @@ const categories = [
   { key: "vocabulary",    label: "어휘" },
 ];
 
-const jaMap = { "발음":"発音", "말하기(모국어X)":"スピーキング", "듣기":"リスニング", "문법":"文法", "어휘":"語彙" };
+const jaMap = {
+  "발음": "発音", "말하기(모국어X)": "スピーキング",
+  "듣기": "リスニング", "문법": "文法", "어휘": "語彙"
+};
 const catColors = ["#3b82f6","#10b981","#f59e0b","#ec4899","#8b5cf6"];
 
-const nowMonth = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`; };
+const nowMonth = () => {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`;
+};
 const todayStr = () => new Date().toISOString().slice(0,10);
 
 const Logo = ({ width = 220 }) => (
-  <svg width={width} viewBox="0 0 300 115" fill="none" xmlns="http://www.w3.org/2000/svg" style={{display:"block",margin:"0 auto"}}>
-    <ellipse cx="108" cy="24" rx="17" ry="23" fill="#2d3461"/>
-    <ellipse cx="108" cy="24" rx="10" ry="15" fill="#e8a0b0"/>
-    <ellipse cx="155" cy="24" rx="17" ry="23" fill="#2d3461"/>
-    <ellipse cx="155" cy="24" rx="10" ry="15" fill="#e8a0b0"/>
+  <svg width={width} viewBox="0 0 300 115" fill="none" xmlns="http://www.w3.org/2000/svg" className="mx-auto">
+    <ellipse cx="108" cy="24" rx="17" ry="23" fill="#2d3461" />
+    <ellipse cx="108" cy="24" rx="10" ry="15" fill="#e8a0b0" />
+    <ellipse cx="155" cy="24" rx="17" ry="23" fill="#2d3461" />
+    <ellipse cx="155" cy="24" rx="10" ry="15" fill="#e8a0b0" />
     <text x="8" y="80" fontFamily="'Trebuchet MS',sans-serif" fontSize="34" fontWeight="600" fill="#2d3461" letterSpacing="0.5">Arin Korean Lab</text>
     <text x="82" y="108" fontFamily="sans-serif" fontSize="17" fill="#2d3461" letterSpacing="3">아린 한국어</text>
   </svg>
 );
 
 const StarRating = ({ value, onChange, color }) => (
-  <div style={{display:"flex",gap:"4px"}}>
+  <div className="flex gap-1">
     {[1,2,3,4,5].map(n => (
       <button key={n} onClick={() => onChange(n)}
-        style={{fontSize:"28px",color: n<=value ? color : "#d1d5db", background:"none", border:"none", cursor:"pointer", padding:"0"}}>★</button>
+        className="text-2xl transition-transform hover:scale-110 focus:outline-none"
+        style={{ color: n <= value ? color : "#d1d5db" }}>★</button>
     ))}
   </div>
 );
@@ -91,6 +83,7 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
+
   const [view, setView] = useState("list");
   const [selected, setSelected] = useState(null);
   const [month, setMonth] = useState(nowMonth());
@@ -101,165 +94,190 @@ export default function App() {
   const [editingLessonId, setEditingLessonId] = useState(null);
   const [reportMonth, setReportMonth] = useState(nowMonth());
 
+  // ── Load ──
   const loadAll = async () => {
     setLoading(true); setError(null);
     try {
-      const [s, l, m] = await Promise.all([
-        api("students?order=id.asc"),
-        api("lesson_logs?order=date.asc"),
-        api("monthly_records?order=month.asc"),
+      const [{ data: s }, { data: l }, { data: m }] = await Promise.all([
+        supabase.from("students").select("*").order("id"),
+        supabase.from("lesson_logs").select("*").order("date"),
+        supabase.from("monthly_records").select("*").order("month"),
       ]);
-      if (s.length === 0) {
-        for (const name of initialStudents) await api("students", "POST", { name });
-        const s2 = await api("students?order=id.asc");
+      if (!s.length) {
+        for (const name of initialStudents) await supabase.from("students").insert({ name });
+        const { data: s2 } = await supabase.from("students").select("*").order("id");
         setStudents(s2);
       } else setStudents(s);
-      setLessons(l); setMonthlyRecords(m);
+      setLessons(l || []);
+      setMonthlyRecords(m || []);
     } catch(e) { setError("DB 연결 오류: " + e.message); }
     setLoading(false);
   };
 
   useEffect(() => { loadAll(); }, []);
 
-  const getColor = (name) => colorPalette[students.findIndex(s=>s.name===name) % colorPalette.length] || colorPalette[0];
+  const getColor = (name) => colorPalette[students.findIndex(s => s.name === name) % colorPalette.length] || colorPalette[0];
   const color = selected ? getColor(selected) : null;
 
+  // ── Student ──
   const addStudent = async () => {
     const t = newName.trim();
-    if (!t || students.find(s=>s.name===t)) return;
+    if (!t || students.find(s => s.name === t)) return;
     setSaving(true);
-    try { const r = await api("students","POST",{name:t}); setStudents(p=>[...p,r[0]]); setNewName(""); }
-    catch(e){setError(e.message);}
+    const { data } = await supabase.from("students").insert({ name: t }).select();
+    setStudents(p => [...p, data[0]]);
+    setNewName("");
     setSaving(false);
   };
 
   const saveEdit = async (id, oldName) => {
     const t = editingName.trim();
-    if (!t||(t!==oldName&&students.find(s=>s.name===t))) return;
+    if (!t || (t !== oldName && students.find(s => s.name === t))) return;
     setSaving(true);
-    try {
-      await api(`students?id=eq.${id}`,"PATCH",{name:t});
-      setStudents(p=>p.map(s=>s.id===id?{...s,name:t}:s));
-      setLessons(p=>p.map(l=>l.student_name===oldName?{...l,student_name:t}:l));
-      setMonthlyRecords(p=>p.map(r=>r.student_name===oldName?{...r,student_name:t}:r));
-    } catch(e){setError(e.message);}
-    setEditingIdx(null); setSaving(false);
+    await supabase.from("students").update({ name: t }).eq("id", id);
+    setStudents(p => p.map(s => s.id === id ? { ...s, name: t } : s));
+    setLessons(p => p.map(l => l.student_name === oldName ? { ...l, student_name: t } : l));
+    setMonthlyRecords(p => p.map(r => r.student_name === oldName ? { ...r, student_name: t } : r));
+    setEditingIdx(null);
+    setSaving(false);
   };
 
   const deleteStudent = async (id, name) => {
     setSaving(true);
-    try {
-      await api(`students?id=eq.${id}`,"DELETE");
-      await api(`lesson_logs?student_name=eq.${encodeURIComponent(name)}`,"DELETE");
-      await api(`monthly_records?student_name=eq.${encodeURIComponent(name)}`,"DELETE");
-      setStudents(p=>p.filter(s=>s.id!==id));
-      setLessons(p=>p.filter(l=>l.student_name!==name));
-      setMonthlyRecords(p=>p.filter(r=>r.student_name!==name));
-    } catch(e){setError(e.message);}
+    await supabase.from("students").delete().eq("id", id);
+    await supabase.from("lesson_logs").delete().eq("student_name", name);
+    await supabase.from("monthly_records").delete().eq("student_name", name);
+    setStudents(p => p.filter(s => s.id !== id));
+    setLessons(p => p.filter(l => l.student_name !== name));
+    setMonthlyRecords(p => p.filter(r => r.student_name !== name));
     setSaving(false);
   };
 
-  const getLessons = (name) => lessons.filter(l=>l.student_name===name);
+  // ── Lessons ──
+  const getLessons = (name) => lessons.filter(l => l.student_name === name);
 
   const saveLesson = async () => {
-    if (!lessonForm||categories.some(c=>lessonForm.scores[c.key]===0)) return;
+    if (!lessonForm || categories.some(c => lessonForm.scores[c.key] === 0)) return;
     setSaving(true);
-    const body = { student_name:selected, date:lessonForm.date,
-      pronunciation:lessonForm.scores.pronunciation, speaking:lessonForm.scores.speaking,
-      listening:lessonForm.scores.listening, grammar:lessonForm.scores.grammar, vocabulary:lessonForm.scores.vocabulary };
-    try {
-      if (editingLessonId) {
-        await api(`lesson_logs?id=eq.${editingLessonId}`,"PATCH",body);
-        setLessons(p=>p.map(l=>l.id===editingLessonId?{...l,...body}:l));
-      } else {
-        const r = await api("lesson_logs","POST",body);
-        setLessons(p=>[...p,r[0]]);
-      }
-      setLessonForm(null); setEditingLessonId(null); setView("lessons");
-    } catch(e){setError(e.message);}
+    const body = {
+      student_name: selected, date: lessonForm.date,
+      pronunciation: lessonForm.scores.pronunciation,
+      speaking: lessonForm.scores.speaking,
+      listening: lessonForm.scores.listening,
+      grammar: lessonForm.scores.grammar,
+      vocabulary: lessonForm.scores.vocabulary,
+    };
+    if (editingLessonId) {
+      await supabase.from("lesson_logs").update(body).eq("id", editingLessonId);
+      setLessons(p => p.map(l => l.id === editingLessonId ? { ...l, ...body } : l));
+    } else {
+      const { data } = await supabase.from("lesson_logs").insert(body).select();
+      setLessons(p => [...p, data[0]]);
+    }
+    setLessonForm(null); setEditingLessonId(null); setView("lessons");
     setSaving(false);
   };
 
   const deleteLesson = async (id) => {
     setSaving(true);
-    try { await api(`lesson_logs?id=eq.${id}`,"DELETE"); setLessons(p=>p.filter(l=>l.id!==id)); }
-    catch(e){setError(e.message);}
+    await supabase.from("lesson_logs").delete().eq("id", id);
+    setLessons(p => p.filter(l => l.id !== id));
     setSaving(false);
   };
 
-  const getMonthlyRecord = (name,m) => monthlyRecords.find(r=>r.student_name===name&&r.month===m);
-  const isMonthFilled = (name,m) => { const r=getMonthlyRecord(name,m); return r&&categories.every(c=>(r[c.key]||0)>0); };
+  // ── Monthly ──
+  const getMonthlyRecord = (name, m) => monthlyRecords.find(r => r.student_name === name && r.month === m);
+  const isMonthFilled = (name, m) => { const r = getMonthlyRecord(name, m); return r && categories.every(c => (r[c.key] || 0) > 0); };
 
-  const updateMonthlyRating = async (cat,val) => {
-    const existing = getMonthlyRecord(selected,month);
-    try {
-      if (existing) {
-        await api(`monthly_records?id=eq.${existing.id}`,"PATCH",{[cat]:val});
-        setMonthlyRecords(p=>p.map(r=>r.id===existing.id?{...r,[cat]:val}:r));
-      } else {
-        const full = {student_name:selected,month,pronunciation:0,speaking:0,listening:0,grammar:0,vocabulary:0,[cat]:val};
-        const r = await api("monthly_records","POST",full);
-        setMonthlyRecords(p=>[...p,r[0]]);
-      }
-    } catch(e){setError(e.message);}
+  const updateMonthlyRating = async (cat, val) => {
+    const existing = getMonthlyRecord(selected, month);
+    if (existing) {
+      await supabase.from("monthly_records").update({ [cat]: val }).eq("id", existing.id);
+      setMonthlyRecords(p => p.map(r => r.id === existing.id ? { ...r, [cat]: val } : r));
+    } else {
+      const full = { student_name: selected, month, pronunciation:0, speaking:0, listening:0, grammar:0, vocabulary:0, [cat]: val };
+      const { data } = await supabase.from("monthly_records").insert(full).select();
+      setMonthlyRecords(p => [...p, data[0]]);
+    }
   };
 
-  const radarDataMonthly = (name,m) => { const r=getMonthlyRecord(name,m); return categories.map(c=>({subject:c.label,점수:r?.[c.key]||0,fullMark:5})); };
-  const avgScoreMonthly = (name,m) => { const r=getMonthlyRecord(name,m); if(!r) return "0.0"; return (categories.reduce((a,c)=>a+(r[c.key]||0),0)/categories.length).toFixed(1); };
-  const recordedMonths = (name) => [...new Set(monthlyRecords.filter(r=>r.student_name===name).map(r=>r.month))].sort().reverse();
-  const lessonMonths = (name) => [...new Set(getLessons(name).map(l=>l.date.slice(0,7)))].sort().reverse();
+  const radarDataMonthly = (name, m) => {
+    const r = getMonthlyRecord(name, m);
+    return categories.map(c => ({ subject: c.label, 점수: r?.[c.key] || 0, fullMark: 5 }));
+  };
+  const avgScoreMonthly = (name, m) => {
+    const r = getMonthlyRecord(name, m);
+    if (!r) return "0.0";
+    return (categories.reduce((a, c) => a + (r[c.key] || 0), 0) / categories.length).toFixed(1);
+  };
+  const recordedMonths = (name) => [...new Set(monthlyRecords.filter(r => r.student_name === name).map(r => r.month))].sort().reverse();
+  const lessonMonths = (name) => [...new Set(getLessons(name).map(l => l.date.slice(0,7)))].sort().reverse();
 
-  const lessonReportData = (name,m) => {
-    const arr = getLessons(name).filter(l=>l.date.startsWith(m));
+  const lessonReportData = (name, m) => {
+    const arr = getLessons(name).filter(l => l.date.startsWith(m));
     if (!arr.length) return null;
-    const avg = {}; categories.forEach(c=>{avg[c.key]=parseFloat((arr.reduce((a,l)=>a+(l[c.key]||0),0)/arr.length).toFixed(2));});
-    return {avg,count:arr.length,lessons:arr};
+    const avg = {};
+    categories.forEach(c => { avg[c.key] = parseFloat((arr.reduce((a, l) => a + (l[c.key] || 0), 0) / arr.length).toFixed(2)); });
+    return { avg, count: arr.length, lessons: arr };
   };
 
-  const historyData = (name) => recordedMonths(name).slice().reverse().map(m=>{
-    const r=getMonthlyRecord(name,m); const row={month:m.replace("-","/")}; categories.forEach(c=>{row[c.label]=r?.[c.key]||0;}); return row;
+  const historyData = (name) => recordedMonths(name).slice().reverse().map(m => {
+    const r = getMonthlyRecord(name, m);
+    const row = { month: m.replace("-", "/") };
+    categories.forEach(c => { row[c.label] = r?.[c.key] || 0; });
+    return row;
   });
 
-  if (loading) return <div style={{minHeight:"100vh",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center"}}><Logo width={180}/><p style={{color:"#9ca3af",marginTop:"12px"}}>데이터 불러오는 중...</p></div>;
-
-  if (error) return (
-    <div style={{minHeight:"100vh",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"24px"}}>
-      <p style={{color:"#f87171",fontSize:"18px",fontWeight:"bold",marginBottom:"8px"}}>⚠️ 오류 발생</p>
-      <p style={{color:"#f87171",fontSize:"14px",marginBottom:"16px"}}>{error}</p>
-      <button onClick={()=>{setError(null);loadAll();}} style={{padding:"8px 24px",background:"#f43f5e",color:"white",borderRadius:"8px",border:"none",cursor:"pointer"}}>다시 시도</button>
+  if (loading) return (
+    <div className="min-h-screen flex flex-col items-center justify-center gap-3">
+      <Logo width={180} />
+      <p className="text-gray-400 text-sm animate-pulse">데이터 불러오는 중...</p>
     </div>
   );
 
-  // LIST
-  if (view==="list") return (
+  if (error) return (
+    <div className="min-h-screen flex flex-col items-center justify-center gap-3 p-6">
+      <p className="text-red-400 text-lg font-bold">⚠️ 오류 발생</p>
+      <p className="text-red-400 text-sm">{error}</p>
+      <button onClick={() => { setError(null); loadAll(); }} className="mt-4 px-4 py-2 bg-rose-500 text-white rounded-lg text-sm">다시 시도</button>
+    </div>
+  );
+
+  // ── LIST ──
+  if (view === "list") return (
     <div className="min-h-screen bg-gradient-to-br from-rose-50 to-sky-50 p-6">
       <div className="max-w-lg mx-auto">
-        <div className="text-center mb-6"><Logo/></div>
+        <div className="text-center mb-6"><Logo /></div>
         <div className="bg-white rounded-xl shadow p-4 mb-4 overflow-hidden">
           <label className="text-sm font-medium text-gray-600 block mb-1">수업 월 선택</label>
-          <input type="month" value={month} onChange={e=>setMonth(e.target.value)}
-            className="border rounded-lg px-3 py-2 w-full max-w-full box-border text-gray-700 focus:outline-none focus:ring-2 focus:ring-rose-300 pr-3"/>
+          <input type="month" value={month} onChange={e => setMonth(e.target.value)}
+            className="border rounded-lg px-3 py-2 w-full max-w-full box-border text-gray-700 focus:outline-none focus:ring-2 focus:ring-rose-300 pr-3" />
         </div>
         <div className="flex justify-between items-center mb-2 px-1">
           <span className="text-sm text-gray-500">학생 {students.length}명</span>
-          <button onClick={()=>setView("manage")} className="text-sm text-rose-500 font-semibold hover:text-rose-700">✏️ 학생 관리</button>
+          <button onClick={() => setView("manage")} className="text-sm text-rose-500 font-semibold hover:text-rose-700">✏️ 학생 관리</button>
         </div>
         <div className="bg-white rounded-xl shadow overflow-hidden">
-          {students.map((s,i)=>{
-            const c=getColor(s.name); const lCount=getLessons(s.name).length; const filled=isMonthFilled(s.name,month);
+          {students.map((s, i) => {
+            const c = getColor(s.name);
+            const lCount = getLessons(s.name).length;
+            const filled = isMonthFilled(s.name, month);
             return (
-              <button key={s.id} onClick={()=>{setSelected(s.name);setView("form");}}
+              <button key={s.id} onClick={() => { setSelected(s.name); setView("form"); }}
                 className="w-full flex items-center justify-between px-5 py-3 hover:bg-gray-50 transition border-b last:border-0 text-left">
                 <div className="flex items-center gap-3">
                   <span className="text-gray-400 text-sm w-5">{i+1}</span>
-                  <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{background:c.stroke}}/>
+                  <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: c.stroke }} />
                   <div>
                     <span className="font-medium text-gray-800 block">{s.name}</span>
-                    <span className="text-xs text-gray-400">{lCount>0?`수업 ${lCount}회 기록`:"수업 기록 없음"}{recordedMonths(s.name).length>0&&` · 월말 ${recordedMonths(s.name).length}개월`}</span>
+                    <span className="text-xs text-gray-400">
+                      {lCount > 0 ? `수업 ${lCount}회 기록` : "수업 기록 없음"}
+                      {recordedMonths(s.name).length > 0 && ` · 월말 ${recordedMonths(s.name).length}개월`}
+                    </span>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  {filled&&<span className={`text-xs px-2 py-0.5 rounded-full ${c.badge}`}>✓ 완료</span>}
+                  {filled && <span className={`text-xs px-2 py-0.5 rounded-full ${c.badge}`}>✓ 완료</span>}
                   <span className="text-gray-400">›</span>
                 </div>
               </button>
@@ -270,38 +288,39 @@ export default function App() {
     </div>
   );
 
-  // MANAGE
-  if (view==="manage") return (
+  // ── MANAGE ──
+  if (view === "manage") return (
     <div className="min-h-screen bg-gradient-to-br from-rose-50 to-sky-50 p-6">
       <div className="max-w-lg mx-auto">
-        <button onClick={()=>{setEditingIdx(null);setView("list");}} className="text-sm text-gray-500 mb-4 hover:text-gray-700">‹ 학생 목록</button>
+        <button onClick={() => { setEditingIdx(null); setView("list"); }} className="text-sm text-gray-500 mb-4 hover:text-gray-700">‹ 학생 목록</button>
         <div className="text-center mb-5"><div className="text-3xl mb-1">✏️</div><h2 className="text-xl font-bold text-gray-800">학생 관리</h2></div>
         <div className="bg-white rounded-xl shadow p-4 mb-4">
           <h3 className="text-sm font-semibold text-gray-700 mb-2">새 학생 추가</h3>
           <div className="flex gap-2">
-            <input value={newName} onChange={e=>setNewName(e.target.value)} onKeyDown={e=>e.key==="Enter"&&addStudent()}
-              placeholder="이름 입력" className="flex-1 border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300"/>
+            <input value={newName} onChange={e => setNewName(e.target.value)} onKeyDown={e => e.key === "Enter" && addStudent()}
+              placeholder="이름 입력" className="flex-1 border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300" />
             <button onClick={addStudent} disabled={saving} className="px-4 py-2 bg-rose-500 text-white text-sm rounded-lg font-semibold hover:bg-rose-600 disabled:opacity-50">추가</button>
           </div>
+          {newName.trim() && students.find(s => s.name === newName.trim()) && <p className="text-xs text-red-400 mt-1">이미 존재하는 이름이에요</p>}
         </div>
         <div className="bg-white rounded-xl shadow overflow-hidden">
-          {students.map((s,i)=>{
-            const c=getColor(s.name);
+          {students.map((s, i) => {
+            const c = getColor(s.name);
             return (
               <div key={s.id} className="flex items-center gap-2 px-4 py-3 border-b last:border-0">
-                <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{background:c.stroke}}/>
-                {editingIdx===i?(
+                <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: c.stroke }} />
+                {editingIdx === i ? (
                   <>
-                    <input value={editingName} onChange={e=>setEditingName(e.target.value)} onKeyDown={e=>e.key==="Enter"&&saveEdit(s.id,s.name)}
-                      autoFocus className="flex-1 border rounded-lg px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300"/>
-                    <button onClick={()=>saveEdit(s.id,s.name)} disabled={saving} className="text-xs px-3 py-1 bg-rose-500 text-white rounded-lg disabled:opacity-50">저장</button>
-                    <button onClick={()=>setEditingIdx(null)} className="text-xs px-3 py-1 bg-gray-100 text-gray-600 rounded-lg">취소</button>
+                    <input value={editingName} onChange={e => setEditingName(e.target.value)} onKeyDown={e => e.key === "Enter" && saveEdit(s.id, s.name)}
+                      autoFocus className="flex-1 border rounded-lg px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300" />
+                    <button onClick={() => saveEdit(s.id, s.name)} disabled={saving} className="text-xs px-3 py-1 bg-rose-500 text-white rounded-lg disabled:opacity-50">저장</button>
+                    <button onClick={() => setEditingIdx(null)} className="text-xs px-3 py-1 bg-gray-100 text-gray-600 rounded-lg">취소</button>
                   </>
-                ):(
+                ) : (
                   <>
                     <span className="flex-1 text-sm font-medium text-gray-800">{s.name}</span>
-                    <button onClick={()=>{setEditingIdx(i);setEditingName(s.name);}} className="text-xs px-3 py-1 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200">수정</button>
-                    <button onClick={()=>deleteStudent(s.id,s.name)} disabled={saving} className="text-xs px-3 py-1 bg-red-50 text-red-500 rounded-lg hover:bg-red-100 disabled:opacity-50">삭제</button>
+                    <button onClick={() => { setEditingIdx(i); setEditingName(s.name); }} className="text-xs px-3 py-1 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200">수정</button>
+                    <button onClick={() => deleteStudent(s.id, s.name)} disabled={saving} className="text-xs px-3 py-1 bg-red-50 text-red-500 rounded-lg hover:bg-red-100 disabled:opacity-50">삭제</button>
                   </>
                 )}
               </div>
@@ -312,49 +331,61 @@ export default function App() {
     </div>
   );
 
-  // LESSONS LIST
-  if (view==="lessons") {
-    const arr=getLessons(selected); const lm=lessonMonths(selected);
+  // ── LESSONS LIST ──
+  if (view === "lessons") {
+    const arr = getLessons(selected);
+    const lm = lessonMonths(selected);
     return (
       <div className={`min-h-screen bg-gradient-to-br ${color.bg} p-6`}>
         <div className="max-w-lg mx-auto">
-          <button onClick={()=>setView("form")} className="text-sm text-gray-500 mb-4 hover:text-gray-700">‹ 돌아가기</button>
-          <div className="text-center mb-4"><Logo width={160}/><div className="text-2xl my-1">📓</div><h2 className="text-xl font-bold text-gray-800">{selected}</h2><p className="text-gray-400 text-sm">수업별 점수 기록</p></div>
-          <button onClick={()=>{setLessonForm({date:todayStr(),scores:Object.fromEntries(categories.map(c=>[c.key,0]))});setEditingLessonId(null);setView("lesson_form");}}
-            className="w-full mb-4 py-3 rounded-xl text-white font-semibold text-sm shadow" style={{background:color.stroke}}>+ 새 수업 점수 추가</button>
-          {lm.length>0&&(
+          <button onClick={() => setView("form")} className="text-sm text-gray-500 mb-4 hover:text-gray-700">‹ 돌아가기</button>
+          <div className="text-center mb-4">
+            <Logo width={160} />
+            <div className="text-2xl my-1">📓</div>
+            <h2 className="text-xl font-bold text-gray-800">{selected}</h2>
+            <p className="text-gray-400 text-sm">수업별 점수 기록</p>
+          </div>
+          <button onClick={() => { setLessonForm({ date: todayStr(), scores: Object.fromEntries(categories.map(c => [c.key, 0])) }); setEditingLessonId(null); setView("lesson_form"); }}
+            className="w-full mb-4 py-3 rounded-xl text-white font-semibold text-sm shadow" style={{ background: color.stroke }}>
+            + 새 수업 점수 추가
+          </button>
+          {lm.length > 0 && (
             <div className="bg-white rounded-xl shadow p-4 mb-4">
               <h3 className="font-semibold text-gray-700 mb-2 text-sm">📊 월별 통계 리포트</h3>
               <div className="flex flex-wrap gap-2">
-                {lm.map(m=>(
-                  <button key={m} onClick={()=>{setReportMonth(m);setView("lesson_report");}}
+                {lm.map(m => (
+                  <button key={m} onClick={() => { setReportMonth(m); setView("lesson_report"); }}
                     className="text-xs px-3 py-1.5 rounded-full border font-semibold transition hover:opacity-80"
-                    style={{borderColor:color.stroke,color:color.stroke}}>{m.replace("-","년 ")}월</button>
+                    style={{ borderColor: color.stroke, color: color.stroke }}>
+                    {m.replace("-", "년 ")}월
+                  </button>
                 ))}
               </div>
             </div>
           )}
-          {arr.length===0?<div className="text-center text-gray-400 py-10">아직 수업 기록이 없어요</div>:(
+          {arr.length === 0 ? (
+            <div className="text-center text-gray-400 py-10">아직 수업 기록이 없어요</div>
+          ) : (
             <div className="space-y-3">
-              {[...arr].reverse().map(lesson=>{
-                const avg=(categories.reduce((a,c)=>a+(lesson[c.key]||0),0)/categories.length).toFixed(1);
+              {[...arr].reverse().map(lesson => {
+                const avg = (categories.reduce((a, c) => a + (lesson[c.key] || 0), 0) / categories.length).toFixed(1);
                 return (
                   <div key={lesson.id} className="bg-white rounded-xl shadow p-4">
                     <div className="flex justify-between items-center mb-2">
                       <span className="font-bold text-gray-700">{lesson.date}</span>
                       <div className="flex items-center gap-2">
-                        <span className="text-sm font-bold" style={{color:color.stroke}}>{avg}/5</span>
-                        <button onClick={()=>{setLessonForm({date:lesson.date,scores:Object.fromEntries(categories.map(c=>[c.key,lesson[c.key]||0]))});setEditingLessonId(lesson.id);setView("lesson_form");}}
+                        <span className="text-sm font-bold" style={{ color: color.stroke }}>{avg}/5</span>
+                        <button onClick={() => { setLessonForm({ date: lesson.date, scores: Object.fromEntries(categories.map(c => [c.key, lesson[c.key] || 0])) }); setEditingLessonId(lesson.id); setView("lesson_form"); }}
                           className="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200">수정</button>
-                        <button onClick={()=>deleteLesson(lesson.id)} disabled={saving}
+                        <button onClick={() => deleteLesson(lesson.id)} disabled={saving}
                           className="text-xs px-2 py-1 bg-red-50 text-red-400 rounded-lg hover:bg-red-100 disabled:opacity-50">삭제</button>
                       </div>
                     </div>
                     <div className="grid grid-cols-5 gap-1">
-                      {categories.map(c=>(
+                      {categories.map(c => (
                         <div key={c.key} className="text-center">
-                          <div className="text-xs text-gray-400 mb-0.5 truncate">{c.label.replace("말하기(모국어X)","말하기")}</div>
-                          <div className="font-bold text-sm" style={{color:color.stroke}}>{lesson[c.key]}</div>
+                          <div className="text-xs text-gray-400 mb-0.5 truncate">{c.label.replace("말하기(모국어X)", "말하기")}</div>
+                          <div className="font-bold text-sm" style={{ color: color.stroke }}>{lesson[c.key]}</div>
                         </div>
                       ))}
                     </div>
@@ -368,95 +399,270 @@ export default function App() {
     );
   }
 
-  // LESSON FORM
-  if (view==="lesson_form") {
-    const lf=lessonForm||{date:todayStr(),scores:Object.fromEntries(categories.map(c=>[c.key,0]))};
-    const allFilled=categories.every(c=>lf.scores[c.key]>0);
+  // ── LESSON FORM ──
+  if (view === "lesson_form") {
+    const lf = lessonForm || { date: todayStr(), scores: Object.fromEntries(categories.map(c => [c.key, 0])) };
+    const allFilled = categories.every(c => lf.scores[c.key] > 0);
     return (
       <div className={`min-h-screen bg-gradient-to-br ${color.bg} p-6`}>
         <div className="max-w-lg mx-auto">
-          <button onClick={()=>{setLessonForm(null);setEditingLessonId(null);setView("lessons");}} className="text-sm text-gray-500 mb-4 hover:text-gray-700">‹ 기록 목록</button>
-          <div className="text-center mb-4"><Logo width={160}/><div className="text-2xl my-1">📝</div><h2 className="text-xl font-bold text-gray-800">{selected}</h2><p className="text-gray-400 text-sm">{editingLessonId?"수업 기록 수정":"새 수업 점수 입력"}</p></div>
+          <button onClick={() => { setLessonForm(null); setEditingLessonId(null); setView("lessons"); }} className="text-sm text-gray-500 mb-4 hover:text-gray-700">‹ 기록 목록</button>
+          <div className="text-center mb-4">
+            <Logo width={160} />
+            <div className="text-2xl my-1">📝</div>
+            <h2 className="text-xl font-bold text-gray-800">{selected}</h2>
+            <p className="text-gray-400 text-sm">{editingLessonId ? "수업 기록 수정" : "새 수업 점수 입력"}</p>
+          </div>
           <div className="bg-white rounded-xl shadow p-4 mb-4">
             <label className="text-sm font-semibold text-gray-700 block mb-2">📅 수업 날짜</label>
-            <input type="date" value={lf.date} onChange={e=>setLessonForm(p=>({...p,date:e.target.value}))}
-              className="border rounded-lg px-3 py-2 w-full box-border text-gray-700 focus:outline-none focus:ring-2 focus:ring-rose-300"/>
+            <input type="date" value={lf.date} onChange={e => setLessonForm(p => ({ ...p, date: e.target.value }))}
+              className="border rounded-lg px-3 py-2 w-full box-border text-gray-700 focus:outline-none focus:ring-2 focus:ring-rose-300" />
           </div>
           <div className="space-y-3 mb-4">
-            {categories.map(c=>(
+            {categories.map(c => (
               <div key={c.key} className="bg-white rounded-xl shadow p-4">
                 <div className="flex justify-between items-center mb-2">
                   <h3 className="font-semibold text-gray-700">{c.label}</h3>
-                  <span className="text-sm font-bold" style={{color:lf.scores[c.key]>0?color.stroke:"#d1d5db"}}>{lf.scores[c.key]>0?`${lf.scores[c.key]} / 5`:"미입력"}</span>
+                  <span className="text-sm font-bold" style={{ color: lf.scores[c.key] > 0 ? color.stroke : "#d1d5db" }}>
+                    {lf.scores[c.key] > 0 ? `${lf.scores[c.key]} / 5` : "미입력"}
+                  </span>
                 </div>
-                <StarRating value={lf.scores[c.key]} color={color.stroke} onChange={v=>setLessonForm(p=>({...p,scores:{...p.scores,[c.key]:v}}))}/>
+                <StarRating value={lf.scores[c.key]} color={color.stroke}
+                  onChange={v => setLessonForm(p => ({ ...p, scores: { ...p.scores, [c.key]: v } }))} />
               </div>
             ))}
           </div>
-          <button onClick={saveLesson} disabled={!allFilled||saving}
+          <button onClick={saveLesson} disabled={!allFilled || saving}
             className="w-full py-3 rounded-xl font-semibold text-white transition"
-            style={{background:allFilled&&!saving?color.stroke:"#d1d5db",cursor:allFilled&&!saving?"pointer":"not-allowed"}}>
-            {saving?"저장 중...":"💾 저장하기"}
+            style={{ background: allFilled && !saving ? color.stroke : "#d1d5db", cursor: allFilled && !saving ? "pointer" : "not-allowed" }}>
+            {saving ? "저장 중..." : "💾 저장하기"}
           </button>
-          {!allFilled&&<p className="text-center text-xs text-gray-400 mt-2">모든 항목 점수를 입력해야 저장할 수 있어요</p>}
+          {!allFilled && <p className="text-center text-xs text-gray-400 mt-2">모든 항목 점수를 입력해야 저장할 수 있어요</p>}
         </div>
       </div>
     );
   }
 
-  // LESSON REPORT
-  if (view==="lesson_report") {
-    const rpt=lessonReportData(selected,reportMonth);
-    const [ry,rm]=reportMonth.split("-");
-    if (!rpt) return <div className={`min-h-screen bg-gradient-to-br ${color.bg} p-6`}><div className="max-w-lg mx-auto"><button onClick={()=>setView("lessons")} className="text-sm text-gray-500 mb-4">‹ 기록 목록</button><div className="text-center text-gray-400 py-20">해당 월의 수업 기록이 없어요</div></div></div>;
-    const rData=categories.map(c=>({subject:c.label,평균:rpt.avg[c.key],fullMark:5}));
-    const maxAvg=Math.max(...categories.map(c=>rpt.avg[c.key]));
-    const tops=categories.filter(c=>rpt.avg[c.key]===maxAvg).map(c=>jaMap[c.label]).join("、");
-    const totalAvg=(categories.reduce((a,c)=>a+rpt.avg[c.key],0)/categories.length).toFixed(1);
-    const trendData=rpt.lessons.map(l=>{const row={date:l.date.slice(5)};categories.forEach(c=>{row[c.label]=l[c.key];});return row;});
+  // ── LESSON REPORT ──
+  if (view === "lesson_report") {
+    const rpt = lessonReportData(selected, reportMonth);
+    const [ry, rm] = reportMonth.split("-");
+    if (!rpt) return (
+      <div className={`min-h-screen bg-gradient-to-br ${color.bg} p-6`}>
+        <div className="max-w-lg mx-auto">
+          <button onClick={() => setView("lessons")} className="text-sm text-gray-500 mb-4">‹ 기록 목록</button>
+          <div className="text-center text-gray-400 py-20">해당 월의 수업 기록이 없어요</div>
+        </div>
+      </div>
+    );
+    const rData = categories.map(c => ({ subject: c.label, 평균: rpt.avg[c.key], fullMark: 5 }));
+    const maxAvg = Math.max(...categories.map(c => rpt.avg[c.key]));
+    const tops = categories.filter(c => rpt.avg[c.key] === maxAvg).map(c => jaMap[c.label]).join("、");
+    const totalAvg = (categories.reduce((a, c) => a + rpt.avg[c.key], 0) / categories.length).toFixed(1);
+    const trendData = rpt.lessons.map(l => {
+      const row = { date: l.date.slice(5) };
+      categories.forEach(c => { row[c.label] = l[c.key]; });
+      return row;
+    });
     return (
       <div className={`min-h-screen bg-gradient-to-br ${color.bg} p-6`}>
         <div className="max-w-lg mx-auto">
-          <button onClick={()=>setView("lessons")} className="text-sm text-gray-500 mb-4 hover:text-gray-700">‹ 기록 목록</button>
-          <div className="text-center mb-5"><Logo width={160}/><div className="text-2xl my-1">📊</div><h2 className="text-xl font-bold text-gray-800">{selected}</h2><p className="text-gray-400 text-sm">{ry}년 {rm}월 수업 통계 리포트</p><p className="text-xs text-gray-400">총 {rpt.count}회 수업 기록 기반</p></div>
+          <button onClick={() => setView("lessons")} className="text-sm text-gray-500 mb-4 hover:text-gray-700">‹ 기록 목록</button>
+          <div className="text-center mb-5">
+            <Logo width={160} />
+            <div className="text-2xl my-1">📊</div>
+            <h2 className="text-xl font-bold text-gray-800">{selected}</h2>
+            <p className="text-gray-400 text-sm">{ry}년 {rm}월 수업 통계 리포트</p>
+            <p className="text-xs text-gray-400">총 {rpt.count}회 수업 기록 기반</p>
+          </div>
           <div className="bg-white rounded-2xl shadow-md p-5 mb-4">
-            <div className="flex justify-between items-center mb-1"><h3 className="font-bold text-gray-700">📊 월 평균 실력 분포</h3><span className="font-bold text-lg" style={{color:color.stroke}}>{totalAvg} / 5.0</span></div>
+            <div className="flex justify-between items-center mb-1">
+              <h3 className="font-bold text-gray-700">📊 월 평균 실력 분포</h3>
+              <span className="font-bold text-lg" style={{ color: color.stroke }}>{totalAvg} / 5.0</span>
+            </div>
             <p className="text-xs text-gray-400 mb-2">수업 {rpt.count}회 평균</p>
-            <div className="rounded-xl px-4 py-2 mb-3 text-sm" style={{background:color.fill+"18",borderLeft:`4px solid ${color.stroke}`}}>{rm}月は<strong>{tops}</strong>が特に輝いていました。😊ありがとうございます！</div>
+            <div className="rounded-xl px-4 py-2 mb-3 text-sm" style={{ background: color.fill + "18", borderLeft: `4px solid ${color.stroke}` }}>
+              {rm}月は<strong>{tops}</strong>が特に輝いていました。😊ありがとうございます！
+            </div>
             <ResponsiveContainer width="100%" height={240}>
-              <RadarChart data={rData}><PolarGrid stroke="#e5e7eb"/><PolarAngleAxis dataKey="subject" tick={{fontSize:12,fontWeight:600,fill:"#374151"}}/><PolarRadiusAxis domain={[0,5]} tickCount={6} tick={{fontSize:9,fill:"#9ca3af"}}/><Radar dataKey="평균" stroke={color.stroke} fill={color.fill} fillOpacity={0.25} strokeWidth={2} dot={{r:4,fill:color.fill}}/><Tooltip formatter={v=>[`${v}점`,"평균"]}/></RadarChart>
+              <RadarChart data={rData}>
+                <PolarGrid stroke="#e5e7eb" />
+                <PolarAngleAxis dataKey="subject" tick={{ fontSize: 12, fontWeight: 600, fill: "#374151" }} />
+                <PolarRadiusAxis domain={[0, 5]} tickCount={6} tick={{ fontSize: 9, fill: "#9ca3af" }} />
+                <Radar dataKey="평균" stroke={color.stroke} fill={color.fill} fillOpacity={0.25} strokeWidth={2} dot={{ r: 4, fill: color.fill }} />
+                <Tooltip formatter={v => [`${v}점`, "평균"]} />
+              </RadarChart>
             </ResponsiveContainer>
             <div className="mt-2 space-y-2">
-              {categories.map(c=>(<div key={c.key} className="flex items-center gap-2"><span className="text-xs text-gray-500 w-24 flex-shrink-0">{c.label}</span><div className="flex-1 bg-gray-100 rounded-full h-2"><div className="h-2 rounded-full transition-all" style={{width:`${rpt.avg[c.key]/5*100}%`,background:color.fill}}/></div><span className="text-xs font-semibold text-gray-600 w-12 text-right">{rpt.avg[c.key]}/5</span></div>))}
+              {categories.map(c => (
+                <div key={c.key} className="flex items-center gap-2">
+                  <span className="text-xs text-gray-500 w-24 flex-shrink-0">{c.label}</span>
+                  <div className="flex-1 bg-gray-100 rounded-full h-2">
+                    <div className="h-2 rounded-full transition-all" style={{ width: `${rpt.avg[c.key] / 5 * 100}%`, background: color.fill }} />
+                  </div>
+                  <span className="text-xs font-semibold text-gray-600 w-12 text-right">{rpt.avg[c.key]}/5</span>
+                </div>
+              ))}
             </div>
           </div>
-          {rpt.count>1&&(<div className="bg-white rounded-2xl shadow-md p-5 mb-4"><h3 className="font-bold text-gray-700 mb-4">📈 수업별 항목 추이</h3><ResponsiveContainer width="100%" height={240}><LineChart data={trendData}><CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0"/><XAxis dataKey="date" tick={{fontSize:11}}/><YAxis domain={[0,5]} tickCount={6} tick={{fontSize:11}}/><Tooltip/><Legend wrapperStyle={{fontSize:10}}/>{categories.map((c,i)=>(<Line key={c.key} type="monotone" dataKey={c.label} stroke={catColors[i]} strokeWidth={2} dot={{r:3}}/>))}</LineChart></ResponsiveContainer></div>)}
-          <button onClick={()=>setView("lessons")} className="w-full py-3 rounded-xl text-white font-semibold text-sm" style={{background:color.stroke}}>‹ 기록 목록으로</button>
+          {rpt.count > 1 && (
+            <div className="bg-white rounded-2xl shadow-md p-5 mb-4">
+              <h3 className="font-bold text-gray-700 mb-4">📈 수업별 항목 추이</h3>
+              <ResponsiveContainer width="100%" height={240}>
+                <LineChart data={trendData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                  <XAxis dataKey="date" tick={{ fontSize: 11 }} />
+                  <YAxis domain={[0, 5]} tickCount={6} tick={{ fontSize: 11 }} />
+                  <Tooltip />
+                  <Legend wrapperStyle={{ fontSize: 10 }} />
+                  {categories.map((c, i) => (
+                    <Line key={c.key} type="monotone" dataKey={c.label} stroke={catColors[i]} strokeWidth={2} dot={{ r: 3 }} />
+                  ))}
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          )}
+          <button onClick={() => setView("lessons")} className="w-full py-3 rounded-xl text-white font-semibold text-sm" style={{ background: color.stroke }}>
+            ‹ 기록 목록으로
+          </button>
         </div>
       </div>
     );
   }
 
-  // HISTORY
-  if (view==="history") {
-    const hData=historyData(selected);
+  // ── FORM (월말 평가) ──
+  if (view === "form") {
+    const rec = getMonthlyRecord(selected, month);
     return (
       <div className={`min-h-screen bg-gradient-to-br ${color.bg} p-6`}>
         <div className="max-w-lg mx-auto">
-          <button onClick={()=>setView("form")} className="text-sm text-gray-500 mb-4 hover:text-gray-700">‹ 평가 입력</button>
-          <div className="text-center mb-5"><Logo width={160}/><div className="text-3xl my-1">🇰🇷</div><h2 className="text-xl font-bold text-gray-800">{selected}</h2><p className="text-gray-400 text-sm">월별 성장 기록</p></div>
-          <div className="bg-white rounded-2xl shadow-md p-5 mb-4"><h3 className="font-bold text-gray-700 mb-4">📈 항목별 월별 추이</h3><ResponsiveContainer width="100%" height={260}><LineChart data={hData}><CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0"/><XAxis dataKey="month" tick={{fontSize:11}}/><YAxis domain={[0,5]} tickCount={6} tick={{fontSize:11}}/><Tooltip/><Legend wrapperStyle={{fontSize:11}}/>{categories.map((c,i)=>(<Line key={c.key} type="monotone" dataKey={c.label} stroke={catColors[i]} strokeWidth={2} dot={{r:4}}/>))}</LineChart></ResponsiveContainer></div>
+          <button onClick={() => setView("list")} className="text-sm text-gray-500 mb-4 hover:text-gray-700">‹ 학생 목록</button>
+          <div className="text-center mb-4">
+            <Logo width={160} />
+            <div className="text-3xl my-1">🇰🇷</div>
+            <h2 className="text-xl font-bold text-gray-800">{selected}</h2>
+            <p className="text-gray-400 text-sm">{month.replace("-", "년 ")}월</p>
+          </div>
+          <button onClick={() => setView("lessons")}
+            className="w-full mb-3 py-3 rounded-xl border-2 font-semibold text-sm shadow bg-white flex items-center justify-center gap-2"
+            style={{ borderColor: color.stroke, color: color.stroke }}>
+            📓 수업별 점수 기록 ({getLessons(selected).length}회)
+          </button>
+          {recordedMonths(selected).length > 0 && (
+            <button onClick={() => setView("history")}
+              className="w-full mb-4 py-2.5 rounded-xl border font-semibold text-sm bg-white shadow hover:bg-gray-50 text-gray-600">
+              📈 월별 성장 기록 ({recordedMonths(selected).length}개월)
+            </button>
+          )}
+          <div className="bg-white rounded-xl p-3 mb-4 shadow">
+            <p className="text-xs text-center text-gray-500 font-semibold">── 월말 종합 평가 ──</p>
+          </div>
+          {isMonthFilled(selected, month) && (
+            <div className="bg-white rounded-xl shadow p-4 mb-4">
+              <p className="text-xs text-center text-gray-400 mb-1">평가 미리보기</p>
+              <ResponsiveContainer width="100%" height={200}>
+                <RadarChart data={radarDataMonthly(selected, month)}>
+                  <PolarGrid />
+                  <PolarAngleAxis dataKey="subject" tick={{ fontSize: 11, fill: "#555" }} />
+                  <PolarRadiusAxis domain={[0, 5]} tickCount={6} tick={{ fontSize: 9, fill: "#aaa" }} />
+                  <Radar dataKey="점수" stroke={color.stroke} fill={color.fill} fillOpacity={0.3} />
+                  <Tooltip />
+                </RadarChart>
+              </ResponsiveContainer>
+            </div>
+          )}
+          <div className="space-y-4">
+            {categories.map(cat => (
+              <div key={cat.key} className="bg-white rounded-xl shadow p-4">
+                <h3 className="font-semibold text-gray-700 mb-3">{cat.label}</h3>
+                <div className="flex flex-wrap gap-2">
+                  {[1, 2, 3, 4, 5].map(r => (
+                    <button key={r} onClick={() => updateMonthlyRating(cat.key, r)}
+                      className={`text-xs px-3 py-1.5 rounded-full border transition ${(rec?.[cat.key] || 0) === r ? "text-white border-transparent" : "bg-white text-gray-500 border-gray-200 hover:border-gray-400"}`}
+                      style={(rec?.[cat.key] || 0) === r ? { background: color.stroke } : {}}>
+                      {["1 - 노력 필요", "2 - 보통", "3 - 좋음", "4 - 훌륭함", "5 - 최우수"][r - 1]}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ))}
+            <button onClick={() => setView("result")} disabled={!isMonthFilled(selected, month)}
+              className="w-full py-3 rounded-xl font-semibold text-white transition"
+              style={{ background: isMonthFilled(selected, month) ? color.stroke : "#d1d5db", cursor: isMonthFilled(selected, month) ? "pointer" : "not-allowed" }}>
+              📊 월말 그래프 생성하기
+            </button>
+            {!isMonthFilled(selected, month) && <p className="text-center text-xs text-gray-400">모든 항목의 점수를 선택해야 생성할 수 있어요</p>}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ── HISTORY ──
+  if (view === "history") {
+    const hData = historyData(selected);
+    return (
+      <div className={`min-h-screen bg-gradient-to-br ${color.bg} p-6`}>
+        <div className="max-w-lg mx-auto">
+          <button onClick={() => setView("form")} className="text-sm text-gray-500 mb-4 hover:text-gray-700">‹ 평가 입력</button>
+          <div className="text-center mb-5">
+            <Logo width={160} />
+            <div className="text-3xl my-1">🇰🇷</div>
+            <h2 className="text-xl font-bold text-gray-800">{selected}</h2>
+            <p className="text-gray-400 text-sm">월별 성장 기록</p>
+          </div>
+          <div className="bg-white rounded-2xl shadow-md p-5 mb-4">
+            <h3 className="font-bold text-gray-700 mb-4">📈 항목별 월별 추이</h3>
+            <ResponsiveContainer width="100%" height={260}>
+              <LineChart data={hData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                <XAxis dataKey="month" tick={{ fontSize: 11 }} />
+                <YAxis domain={[0, 5]} tickCount={6} tick={{ fontSize: 11 }} />
+                <Tooltip /><Legend wrapperStyle={{ fontSize: 11 }} />
+                {categories.map((c, i) => (
+                  <Line key={c.key} type="monotone" dataKey={c.label} stroke={catColors[i]} strokeWidth={2} dot={{ r: 4 }} />
+                ))}
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
           <div className="space-y-3">
-            {recordedMonths(selected).map(m=>{
-              const [y,mo]=m.split("-"); const r=getMonthlyRecord(selected,m);
-              const maxS=Math.max(...categories.map(c=>r?.[c.key]||0));
-              const tops=categories.filter(c=>(r?.[c.key]||0)===maxS).map(c=>jaMap[c.label]).join("、");
+            {recordedMonths(selected).map(m => {
+              const [y, mo] = m.split("-");
+              const r = getMonthlyRecord(selected, m);
+              const maxS = Math.max(...categories.map(c => r?.[c.key] || 0));
+              const tops = categories.filter(c => (r?.[c.key] || 0) === maxS).map(c => jaMap[c.label]).join("、");
               return (
                 <div key={m} className="bg-white rounded-xl shadow p-4">
-                  <div className="flex justify-between items-center mb-2"><span className="font-bold text-gray-700">{y}년 {mo}월</span><span className="font-bold text-sm" style={{color:color.stroke}}>{avgScoreMonthly(selected,m)} / 5.0</span></div>
-                  <div className="rounded-lg px-3 py-2 mb-3 text-xs" style={{background:color.fill+"18",borderLeft:`3px solid ${color.stroke}`}}>{mo}月は<strong>{tops}</strong>が特に輝いていました。😊</div>
-                  <ResponsiveContainer width="100%" height={160}><RadarChart data={radarDataMonthly(selected,m)}><PolarGrid stroke="#e5e7eb"/><PolarAngleAxis dataKey="subject" tick={{fontSize:11,fill:"#374151"}}/><PolarRadiusAxis domain={[0,5]} tickCount={6} tick={{fontSize:9,fill:"#9ca3af"}}/><Radar dataKey="점수" stroke={color.stroke} fill={color.fill} fillOpacity={0.25} strokeWidth={2} dot={{r:3,fill:color.fill}}/><Tooltip formatter={v=>[`${v}점`,"점수"]}/></RadarChart></ResponsiveContainer>
-                  <div className="mt-1 space-y-1">{categories.map(c=>{const v=r?.[c.key]||0;return(<div key={c.key} className="flex items-center gap-2"><span className="text-xs text-gray-500 w-24 flex-shrink-0">{c.label}</span><div className="flex-1 bg-gray-100 rounded-full h-1.5"><div className="h-1.5 rounded-full" style={{width:`${v/5*100}%`,background:color.fill}}/></div><span className="text-xs font-semibold text-gray-600 w-8 text-right">{v}/5</span></div>);})}</div>
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="font-bold text-gray-700">{y}년 {mo}월</span>
+                    <span className="font-bold text-sm" style={{ color: color.stroke }}>{avgScoreMonthly(selected, m)} / 5.0</span>
+                  </div>
+                  <div className="rounded-lg px-3 py-2 mb-3 text-xs" style={{ background: color.fill + "18", borderLeft: `3px solid ${color.stroke}` }}>
+                    {mo}月は<strong>{tops}</strong>が特に輝いていました。😊
+                  </div>
+                  <ResponsiveContainer width="100%" height={160}>
+                    <RadarChart data={radarDataMonthly(selected, m)}>
+                      <PolarGrid stroke="#e5e7eb" />
+                      <PolarAngleAxis dataKey="subject" tick={{ fontSize: 11, fill: "#374151" }} />
+                      <PolarRadiusAxis domain={[0, 5]} tickCount={6} tick={{ fontSize: 9, fill: "#9ca3af" }} />
+                      <Radar dataKey="점수" stroke={color.stroke} fill={color.fill} fillOpacity={0.25} strokeWidth={2} dot={{ r: 3, fill: color.fill }} />
+                      <Tooltip formatter={v => [`${v}점`, "점수"]} />
+                    </RadarChart>
+                  </ResponsiveContainer>
+                  <div className="mt-1 space-y-1">
+                    {categories.map(c => {
+                      const v = r?.[c.key] || 0;
+                      return (
+                        <div key={c.key} className="flex items-center gap-2">
+                          <span className="text-xs text-gray-500 w-24 flex-shrink-0">{c.label}</span>
+                          <div className="flex-1 bg-gray-100 rounded-full h-1.5">
+                            <div className="h-1.5 rounded-full" style={{ width: `${v / 5 * 100}%`, background: color.fill }} />
+                          </div>
+                          <span className="text-xs font-semibold text-gray-600 w-8 text-right">{v}/5</span>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
               );
             })}
@@ -466,28 +672,66 @@ export default function App() {
     );
   }
 
-  // RESULT
-  const [year,mon]=month.split("-");
-  const rec=getMonthlyRecord(selected,month);
-  const maxScore=Math.max(...categories.map(c=>rec?.[c.key]||0));
-  const topCats=categories.filter(c=>(rec?.[c.key]||0)===maxScore);
-  const topNamesJa=topCats.map(c=>jaMap[c.label]).join("、");
+  // ── RESULT ──
+  const [year, mon] = month.split("-");
+  const rec = getMonthlyRecord(selected, month);
+  const maxScore = Math.max(...categories.map(c => rec?.[c.key] || 0));
+  const topCats = categories.filter(c => (rec?.[c.key] || 0) === maxScore);
+  const topNamesJa = topCats.map(c => jaMap[c.label]).join("、");
+
   return (
     <div className={`min-h-screen bg-gradient-to-br ${color.bg} p-6`}>
       <div className="max-w-lg mx-auto">
-        <button onClick={()=>setView("form")} className="text-sm text-gray-500 mb-4 hover:text-gray-700">‹ 평가 수정</button>
-        <div className="text-center mb-5"><Logo width={160}/><div className="text-3xl my-1">🇰🇷</div><h2 className="text-xl font-bold text-gray-800">{selected}</h2><p className="text-gray-400 text-sm">{year}년 {mon}월 월말 피드백</p></div>
-        <div className="bg-white rounded-2xl shadow-md p-5 mb-4">
-          <div className="flex items-center justify-between mb-1"><h3 className="font-bold text-gray-700 text-base">📊 이번 달 실력 분포</h3><span className="font-bold text-lg" style={{color:color.stroke}}>{avgScoreMonthly(selected,month)} / 5.0</span></div>
-          <p className="text-xs text-gray-400 mb-3">5점 만점 레이더 차트</p>
-          <div className="rounded-xl px-4 py-3 mb-3 text-sm" style={{background:color.fill+"18",borderLeft:`4px solid ${color.stroke}`}}><p className="text-gray-700 leading-relaxed">{mon}月は<strong>{topNamesJa}</strong>が特に輝いていました。😊ありがとうございます！</p></div>
-          <ResponsiveContainer width="100%" height={260}><RadarChart data={radarDataMonthly(selected,month)}><PolarGrid stroke="#e5e7eb"/><PolarAngleAxis dataKey="subject" tick={{fontSize:13,fontWeight:600,fill:"#374151"}}/><PolarRadiusAxis domain={[0,5]} tickCount={6} tick={{fontSize:10,fill:"#9ca3af"}}/><Radar dataKey="점수" stroke={color.stroke} fill={color.fill} fillOpacity={0.25} strokeWidth={2} dot={{r:4,fill:color.fill}}/><Tooltip formatter={v=>[`${v}점`,"점수"]}/></RadarChart></ResponsiveContainer>
-          <div className="mt-2 space-y-2">{categories.map(c=>{const v=rec?.[c.key]||0;return(<div key={c.key} className="flex items-center gap-2"><span className="text-xs text-gray-500 w-24 flex-shrink-0">{c.label}</span><div className="flex-1 bg-gray-100 rounded-full h-2"><div className="h-2 rounded-full transition-all" style={{width:`${v/5*100}%`,background:color.fill}}/></div><span className="text-xs font-semibold text-gray-600 w-8 text-right">{v}/5</span></div>);})}</div>
+        <button onClick={() => setView("form")} className="text-sm text-gray-500 mb-4 hover:text-gray-700">‹ 평가 수정</button>
+        <div className="text-center mb-5">
+          <Logo width={160} />
+          <div className="text-3xl my-1">🇰🇷</div>
+          <h2 className="text-xl font-bold text-gray-800">{selected}</h2>
+          <p className="text-gray-400 text-sm">{year}년 {mon}월 월말 피드백</p>
         </div>
-        {recordedMonths(selected).length>1&&(<button onClick={()=>setView("history")} className="w-full mb-3 py-2.5 rounded-xl border text-sm font-semibold text-gray-600 bg-white shadow hover:bg-gray-50" style={{borderColor:color.stroke}}>📈 월별 성장 기록 보기</button>)}
+        <div className="bg-white rounded-2xl shadow-md p-5 mb-4">
+          <div className="flex items-center justify-between mb-1">
+            <h3 className="font-bold text-gray-700 text-base">📊 이번 달 실력 분포</h3>
+            <span className="font-bold text-lg" style={{ color: color.stroke }}>{avgScoreMonthly(selected, month)} / 5.0</span>
+          </div>
+          <p className="text-xs text-gray-400 mb-3">5점 만점 레이더 차트</p>
+          <div className="rounded-xl px-4 py-3 mb-3 text-sm" style={{ background: color.fill + "18", borderLeft: `4px solid ${color.stroke}` }}>
+            <p className="text-gray-700 leading-relaxed">{mon}月は<strong>{topNamesJa}</strong>が特に輝いていました。😊ありがとうございます！</p>
+          </div>
+          <ResponsiveContainer width="100%" height={260}>
+            <RadarChart data={radarDataMonthly(selected, month)}>
+              <PolarGrid stroke="#e5e7eb" />
+              <PolarAngleAxis dataKey="subject" tick={{ fontSize: 13, fontWeight: 600, fill: "#374151" }} />
+              <PolarRadiusAxis domain={[0, 5]} tickCount={6} tick={{ fontSize: 10, fill: "#9ca3af" }} />
+              <Radar dataKey="점수" stroke={color.stroke} fill={color.fill} fillOpacity={0.25} strokeWidth={2} dot={{ r: 4, fill: color.fill }} />
+              <Tooltip formatter={v => [`${v}점`, "점수"]} />
+            </RadarChart>
+          </ResponsiveContainer>
+          <div className="mt-2 space-y-2">
+            {categories.map(c => {
+              const v = rec?.[c.key] || 0;
+              return (
+                <div key={c.key} className="flex items-center gap-2">
+                  <span className="text-xs text-gray-500 w-24 flex-shrink-0">{c.label}</span>
+                  <div className="flex-1 bg-gray-100 rounded-full h-2">
+                    <div className="h-2 rounded-full transition-all" style={{ width: `${v / 5 * 100}%`, background: color.fill }} />
+                  </div>
+                  <span className="text-xs font-semibold text-gray-600 w-8 text-right">{v}/5</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+        {recordedMonths(selected).length > 1 && (
+          <button onClick={() => setView("history")}
+            className="w-full mb-3 py-2.5 rounded-xl border text-sm font-semibold text-gray-600 bg-white shadow hover:bg-gray-50"
+            style={{ borderColor: color.stroke }}>
+            📈 월별 성장 기록 보기
+          </button>
+        )}
         <div className="flex gap-3">
-          <button onClick={()=>setView("form")} className="flex-1 py-3 rounded-xl border border-gray-300 text-gray-600 font-semibold hover:bg-gray-50 text-sm">‹ 평가 수정</button>
-          <button onClick={()=>setView("list")} className="flex-1 py-3 rounded-xl text-white font-semibold text-sm" style={{background:color.stroke}}>다른 학생</button>
+          <button onClick={() => setView("form")} className="flex-1 py-3 rounded-xl border border-gray-300 text-gray-600 font-semibold hover:bg-gray-50 text-sm">‹ 평가 수정</button>
+          <button onClick={() => setView("list")} className="flex-1 py-3 rounded-xl text-white font-semibold text-sm" style={{ background: color.stroke }}>다른 학생</button>
         </div>
       </div>
     </div>
