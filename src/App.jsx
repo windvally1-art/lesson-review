@@ -37,14 +37,14 @@ const colorPalette = [
 
 const categories = [
   { key: "pronunciation", label: "발음" },
-  { key: "speaking",      label: "말하기(모국어X)" },
-  { key: "listening",     label: "듣기" },
-  { key: "grammar",       label: "문법" },
   { key: "vocabulary",    label: "어휘" },
+  { key: "grammar",       label: "문법" },
+  { key: "listening",     label: "듣기" },
+  { key: "speaking",      label: "말하기(母国語X)" },
 ];
 
 const jaMap = {
-  "발음": "発音", "말하기(모국어X)": "スピーキング",
+  "발음": "発音", "말하기(母国語X)": "スピーキング",
   "듣기": "リスニング", "문법": "文法", "어휘": "語彙"
 };
 const catColors = ["#3b82f6","#10b981","#f59e0b","#ec4899","#8b5cf6"];
@@ -384,7 +384,7 @@ export default function App() {
                     <div className="grid grid-cols-5 gap-1">
                       {categories.map(c => (
                         <div key={c.key} className="text-center">
-                          <div className="text-xs text-gray-400 mb-0.5 truncate">{c.label.replace("말하기(모국어X)", "말하기")}</div>
+                          <div className="text-xs text-gray-400 mb-0.5 truncate">{c.label.replace("말하기(母国語X)", "말하기")}</div>
                           <div className="font-bold text-sm" style={{ color: color.stroke }}>{lesson[c.key]}</div>
                         </div>
                       ))}
