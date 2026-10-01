@@ -5,6 +5,16 @@ import {
   CartesianGrid, Legend
 } from "recharts";
 import { createClient } from "@supabase/supabase-js";
+import { ArrowRight, ChevronRight } from "lucide-react";
+import pronunciationIcon from "./assets/canva-icons/pronunciation.png";
+import vocabularyIcon from "./assets/canva-icons/vocabulary.png";
+import grammarIcon from "./assets/canva-icons/grammar.png";
+import listeningIcon from "./assets/canva-icons/listening.png";
+import speakingIcon from "./assets/canva-icons/speaking.png";
+import calendarBlueIcon from "./assets/canva-icons/calendar-blue.png";
+import targetBlueIcon from "./assets/canva-icons/target-blue.png";
+import starBadgeIcon from "./assets/canva-icons/star-badge-blue.png";
+import arinLogo from "./assets/arin-logo.png";
 
 const supabase = createClient(
   import.meta.env.VITE_SUPABASE_URL,
@@ -36,11 +46,11 @@ const colorPalette = [
 ];
 
 const categories = [
-  { key: "pronunciation", label: "발음" },
-  { key: "vocabulary",    label: "어휘" },
-  { key: "grammar",       label: "문법" },
-  { key: "listening",     label: "듣기" },
-  { key: "speaking",      label: "말하기(母国語X)" },
+  { key: "pronunciation", label: "발음",           iconImg: pronunciationIcon, color: "#3b82f6" },
+  { key: "vocabulary",    label: "어휘",           iconImg: vocabularyIcon,    color: "#10b981" },
+  { key: "grammar",       label: "문법",           iconImg: grammarIcon,       color: "#f59e0b" },
+  { key: "listening",     label: "듣기",           iconImg: listeningIcon,     color: "#8b5cf6" },
+  { key: "speaking",      label: "말하기(母国語X)", iconImg: speakingIcon,      color: "#ec4899" },
 ];
 
 const jaMap = {
@@ -54,16 +64,14 @@ const nowMonth = () => {
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`;
 };
 const todayStr = () => new Date().toISOString().slice(0,10);
+const prevMonthStr = (m) => {
+  const [y, mo] = m.split("-").map(Number);
+  const d = new Date(y, mo - 2, 1);
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`;
+};
 
 const Logo = ({ width = 220 }) => (
-  <svg width={width} viewBox="0 0 300 115" fill="none" xmlns="http://www.w3.org/2000/svg" className="mx-auto">
-    <ellipse cx="108" cy="24" rx="17" ry="23" fill="#2d3461" />
-    <ellipse cx="108" cy="24" rx="10" ry="15" fill="#e8a0b0" />
-    <ellipse cx="155" cy="24" rx="17" ry="23" fill="#2d3461" />
-    <ellipse cx="155" cy="24" rx="10" ry="15" fill="#e8a0b0" />
-    <text x="8" y="80" fontFamily="'Trebuchet MS',sans-serif" fontSize="34" fontWeight="600" fill="#2d3461" letterSpacing="0.5">Arin Korean Lab</text>
-    <text x="82" y="108" fontFamily="sans-serif" fontSize="17" fill="#2d3461" letterSpacing="3">아린 한국어</text>
-  </svg>
+  <img src={arinLogo} alt="Arin Korean Lab" className="mx-auto" style={{ width, height: "auto" }} />
 );
 
 const StarRating = ({ value, onChange, color }) => (
@@ -73,6 +81,20 @@ const StarRating = ({ value, onChange, color }) => (
         className="text-2xl transition-transform hover:scale-110 focus:outline-none"
         style={{ color: n <= value ? color : "#d1d5db" }}>★</button>
     ))}
+  </div>
+);
+
+const StarDisplay = ({ value, color = "#f59e0b", size = "text-sm" }) => (
+  <div className={`inline-flex ${size}`}>
+    {[0,1,2,3,4].map(i => {
+      const fill = Math.max(0, Math.min(1, value - i)) * 100;
+      return (
+        <span key={i} className="relative inline-block leading-none" style={{ color: "#d1d5db" }}>
+          ★
+          <span className="absolute inset-0 overflow-hidden" style={{ width: `${fill}%`, color }}>★</span>
+        </span>
+      );
+    })}
   </div>
 );
 
@@ -230,7 +252,9 @@ export default function App() {
 
   if (loading) return (
     <div className="min-h-screen flex flex-col items-center justify-center gap-3">
-      <Logo width={180} />
+      <div className="inline-block bg-white rounded-full shadow-sm px-8 py-5">
+        <Logo width={180} />
+      </div>
       <p className="text-gray-400 text-sm animate-pulse">데이터 불러오는 중...</p>
     </div>
   );
@@ -247,7 +271,9 @@ export default function App() {
   if (view === "list") return (
     <div className="min-h-screen bg-gradient-to-br from-rose-50 to-sky-50 p-6">
       <div className="max-w-lg mx-auto">
-        <div className="text-center mb-6"><Logo /></div>
+        <div className="text-center mb-6">
+          <div className="inline-block bg-white rounded-full shadow-sm px-8 py-5"><Logo /></div>
+        </div>
         <div className="bg-white rounded-xl shadow p-4 mb-4 overflow-hidden">
           <label className="text-sm font-medium text-gray-600 block mb-1">수업 월 선택</label>
           <input type="month" value={month} onChange={e => setMonth(e.target.value)}
@@ -284,6 +310,60 @@ export default function App() {
             );
           })}
         </div>
+        <div className="text-center mt-4">
+          <button onClick={() => setView("promo")} className="text-xs text-gray-400 hover:text-gray-600">📢 프로모션 카드 보기</button>
+        </div>
+      </div>
+    </div>
+  );
+
+  // ── PROMO (Canva 9페이지 복제) ──
+  if (view === "promo") return (
+    <div className="min-h-screen p-6" style={{ background: "#FFFDC6" }}>
+      <div className="max-w-lg mx-auto">
+        <button onClick={() => setView("list")} className="text-sm text-gray-500 mb-4 hover:text-gray-700">‹ 목록으로</button>
+
+        <p className="text-center text-gray-800 mb-6">@reallygreatsite</p>
+
+        <h1 className="text-center text-black leading-tight mb-10 text-5xl" style={{ fontFamily: "'Black Han Sans', sans-serif" }}>
+          "로고는 만들었는데…<br />왜 부족해 보일까?"
+        </h1>
+
+        <div className="relative mx-auto mb-6" style={{ width: "72%" }}>
+          <div className="absolute left-1/2 -top-3 w-24 h-7 bg-amber-200/60 -translate-x-[65%] rotate-[-8deg] rounded-sm" />
+          <div className="absolute left-1/2 -bottom-3 w-24 h-7 bg-amber-200/50 -translate-x-[35%] rotate-[6deg] rounded-sm" />
+          <div className="relative bg-white shadow-xl px-6 py-10 rotate-[-3.9155deg]">
+            <p className="text-2xl mb-6" style={{ fontFamily: "'Poor Story', cursive" }}>브랜드 느낌이 안 산다</p>
+            <p className="text-2xl mb-6" style={{ fontFamily: "'Poor Story', cursive" }}>너무 평범하다</p>
+            <p className="text-2xl" style={{ fontFamily: "'Poor Story', cursive" }}>기억에 안 남는다</p>
+          </div>
+        </div>
+
+        <div className="flex justify-end -mt-10 mb-2 pr-4">
+          <svg viewBox="0 0 120 170" width="88" height="125" fill="none" stroke="black" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M60 8c-24 0-40 18-40 40 0 16 8 26 16 34 6 6 10 12 11 20h26c1-8 5-14 11-20 8-8 16-18 16-34 0-22-16-40-40-40z" />
+            <path d="M52 60c-2-6 2-10 6-8 1-4 6-6 9-2 2-3 7-2 8 2 4-1 7 3 5 7-2 4-8 6-14 6-6 6-10 14-10 22" />
+            <path d="M52 60c-3 2-2 6 1 8" />
+            <rect x="46" y="102" width="28" height="8" rx="2" />
+            <line x1="46" y1="112" x2="74" y2="112" />
+            <line x1="46" y1="118" x2="74" y2="118" />
+            <line x1="46" y1="124" x2="74" y2="124" />
+            <path d="M50 130h20v6a10 6 0 01-20 0z" fill="black" />
+          </svg>
+        </div>
+
+        <p className="text-xl font-extrabold text-black leading-snug text-center mb-6 px-1">
+          <span className="text-2xl align-middle">✓</span>디자인은 감각이 아니라<br />전략 + 해석이 들어가야 합니다!
+        </p>
+
+        <div className="w-[72%] mx-auto rounded-full py-4 px-5 flex items-center gap-2 mb-3 shadow-md" style={{ background: "#f8cd34" }}>
+          <span className="flex-1 text-black font-extrabold text-base leading-snug text-center">DM으로 "로고 점검" 보내면<br />무료 피드백 드려요</span>
+          <span className="flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center ml-3" style={{ background: "radial-gradient(circle at 35% 30%, #FDEFA3, #F0B90B)" }}>
+            <ChevronRight size={26} color="black" strokeWidth={3} />
+          </span>
+        </div>
+
+        <p className="text-center text-base text-gray-800 font-medium">2035년 5월 25일까지</p>
       </div>
     </div>
   );
@@ -340,7 +420,9 @@ export default function App() {
         <div className="max-w-lg mx-auto">
           <button onClick={() => setView("form")} className="text-sm text-gray-500 mb-4 hover:text-gray-700">‹ 돌아가기</button>
           <div className="text-center mb-4">
-            <Logo width={160} />
+            <div className="inline-block bg-white rounded-full shadow-sm px-8 py-5">
+              <Logo width={160} />
+            </div>
             <div className="text-2xl my-1">📓</div>
             <h2 className="text-xl font-bold text-gray-800">{selected}</h2>
             <p className="text-gray-400 text-sm">수업별 점수 기록</p>
@@ -408,7 +490,9 @@ export default function App() {
         <div className="max-w-lg mx-auto">
           <button onClick={() => { setLessonForm(null); setEditingLessonId(null); setView("lessons"); }} className="text-sm text-gray-500 mb-4 hover:text-gray-700">‹ 기록 목록</button>
           <div className="text-center mb-4">
-            <Logo width={160} />
+            <div className="inline-block bg-white rounded-full shadow-sm px-8 py-5">
+              <Logo width={160} />
+            </div>
             <div className="text-2xl my-1">📝</div>
             <h2 className="text-xl font-bold text-gray-800">{selected}</h2>
             <p className="text-gray-400 text-sm">{editingLessonId ? "수업 기록 수정" : "새 수업 점수 입력"}</p>
@@ -446,7 +530,7 @@ export default function App() {
   // ── LESSON REPORT ──
   if (view === "lesson_report") {
     const rpt = lessonReportData(selected, reportMonth);
-    const [ry, rm] = reportMonth.split("-");
+    const [, rm] = reportMonth.split("-");
     if (!rpt) return (
       <div className={`min-h-screen bg-gradient-to-br ${color.bg} p-6`}>
         <div className="max-w-lg mx-auto">
@@ -455,76 +539,101 @@ export default function App() {
         </div>
       </div>
     );
-    const rData = categories.map(c => ({ subject: c.label, 평균: rpt.avg[c.key], fullMark: 5 }));
-    const maxAvg = Math.max(...categories.map(c => rpt.avg[c.key]));
-    const tops = categories.filter(c => rpt.avg[c.key] === maxAvg).map(c => jaMap[c.label]).join("、");
+    const rData = categories.map(c => ({ subject: c.key === "speaking" ? "말하기" : c.label, 평균: rpt.avg[c.key], fullMark: 5 }));
     const totalAvg = (categories.reduce((a, c) => a + rpt.avg[c.key], 0) / categories.length).toFixed(1);
-    const trendData = rpt.lessons.map(l => {
-      const row = { date: l.date.slice(5) };
-      categories.forEach(c => { row[c.label] = l[c.key]; });
-      return row;
-    });
+    const prevMonth = prevMonthStr(reportMonth);
+    const prevRpt = lessonReportData(selected, prevMonth);
+    const [, prevRm] = prevMonth.split("-");
     return (
       <div className={`min-h-screen bg-gradient-to-br ${color.bg} p-6`}>
         <div className="max-w-lg mx-auto">
           <button onClick={() => setView("lessons")} className="text-sm text-gray-500 mb-4 hover:text-gray-700">‹ 기록 목록</button>
-          <div className="text-center mb-5">
-            <Logo width={160} />
-            <div className="text-2xl my-1">📊</div>
-            <h2 className="text-xl font-bold text-gray-800">{selected}</h2>
-            <p className="text-gray-400 text-sm">{ry}년 {rm}월 수업 통계 리포트</p>
-            <p className="text-xs text-gray-400">총 {rpt.count}회 수업 기록 기반</p>
+          <div className="flex justify-center mb-5">
+            <div className="inline-block bg-white rounded-full shadow-sm px-8 py-5">
+              <Logo width={160} />
+            </div>
           </div>
+
           <div className="bg-white rounded-2xl shadow-md p-5 mb-4">
-            <div className="flex justify-between items-center mb-1">
-              <h3 className="font-bold text-gray-700">📊 월 평균 실력 분포</h3>
-              <span className="font-bold text-lg" style={{ color: color.stroke }}>{totalAvg} / 5.0</span>
+            <div className="mb-4">
+              <h2 className="text-3xl font-bold" style={{ color: color.stroke }}>{rm}월</h2>
             </div>
-            <p className="text-xs text-gray-400 mb-2">수업 {rpt.count}회 평균</p>
-            <div className="rounded-xl px-4 py-2 mb-3 text-sm" style={{ background: color.fill + "18", borderLeft: `4px solid ${color.stroke}` }}>
-              {rm}月は<strong>{tops}</strong>が特に輝いていました。😊ありがとうございます！
-            </div>
-            <ResponsiveContainer width="100%" height={240}>
-              <RadarChart data={rData}>
-                <PolarGrid stroke="#e5e7eb" />
-                <PolarAngleAxis dataKey="subject" tick={{ fontSize: 12, fontWeight: 600, fill: "#374151" }} />
-                <PolarRadiusAxis domain={[0, 5]} tickCount={6} tick={{ fontSize: 9, fill: "#9ca3af" }} />
-                <Radar dataKey="평균" stroke={color.stroke} fill={color.fill} fillOpacity={0.25} strokeWidth={2} dot={{ r: 4, fill: color.fill }} />
-                <Tooltip formatter={v => [`${v}점`, "평균"]} />
-              </RadarChart>
-            </ResponsiveContainer>
-            <div className="mt-2 space-y-2">
-              {categories.map(c => (
-                <div key={c.key} className="flex items-center gap-2">
-                  <span className="text-xs text-gray-500 w-24 flex-shrink-0">{c.label}</span>
-                  <div className="flex-1 bg-gray-100 rounded-full h-2">
-                    <div className="h-2 rounded-full transition-all" style={{ width: `${rpt.avg[c.key] / 5 * 100}%`, background: color.fill }} />
-                  </div>
-                  <span className="text-xs font-semibold text-gray-600 w-12 text-right">{rpt.avg[c.key]}/5</span>
+            <div className="flex gap-3 items-center">
+              <div className="flex flex-col gap-2 flex-shrink-0">
+                <div className="text-center bg-gray-50 rounded-xl px-3 py-2">
+                  <div className="font-bold text-gray-700">{selected}</div>
                 </div>
-              ))}
+                <div className="text-center bg-gray-50 rounded-xl px-3 py-2">
+                  <div className="flex items-center justify-center gap-1 text-[10px] text-gray-400 mb-0.5">
+                    <img src={calendarBlueIcon} alt="" className="w-3 h-3" /> 수업 횟수
+                  </div>
+                  <div className="font-bold text-gray-700">{rpt.count}회</div>
+                </div>
+                <div className="text-center rounded-xl px-3 py-2" style={{ background: color.fill + "14" }}>
+                  <div className="flex items-center justify-center gap-1 text-[10px] text-gray-400 mb-0.5">
+                    <img src={targetBlueIcon} alt="" className="w-3 h-3" /> 종합 평균
+                  </div>
+                  <div className="font-bold" style={{ color: color.stroke }}>{totalAvg}/5.0</div>
+                </div>
+              </div>
+              <div className="flex-1 min-w-0">
+                <ResponsiveContainer width="100%" height={200}>
+                  <RadarChart data={rData}>
+                    <PolarGrid stroke="#e5e7eb" />
+                    <PolarAngleAxis dataKey="subject" tick={{ fontSize: 11, fontWeight: 600, fill: "#374151" }} />
+                    <PolarRadiusAxis domain={[0, 5]} tickCount={6} tick={{ fontSize: 9, fill: "#9ca3af" }} />
+                    <Radar dataKey="평균" stroke={color.stroke} fill={color.fill} fillOpacity={0.25} strokeWidth={2} dot={{ r: 4, fill: color.fill }} />
+                    <Tooltip formatter={v => [`${v}점`, "평균"]} />
+                  </RadarChart>
+                </ResponsiveContainer>
+              </div>
             </div>
           </div>
-          {rpt.count > 1 && (
+
+          {prevRpt && (
             <div className="bg-white rounded-2xl shadow-md p-5 mb-4">
-              <h3 className="font-bold text-gray-700 mb-4">📈 수업별 항목 추이</h3>
-              <ResponsiveContainer width="100%" height={240}>
-                <LineChart data={trendData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                  <XAxis dataKey="date" tick={{ fontSize: 11 }} />
-                  <YAxis domain={[0, 5]} tickCount={6} tick={{ fontSize: 11 }} />
-                  <Tooltip />
-                  <Legend wrapperStyle={{ fontSize: 10 }} />
-                  {categories.map((c, i) => (
-                    <Line key={c.key} type="monotone" dataKey={c.label} stroke={catColors[i]} strokeWidth={2} dot={{ r: 3 }} />
-                  ))}
-                </LineChart>
-              </ResponsiveContainer>
+              <h3 className="font-bold text-gray-700 mb-3 flex items-center gap-2">
+                <img src={starBadgeIcon} alt="" className="w-7 h-7" />
+                영역별 점수 비교
+              </h3>
+              <div className="grid grid-cols-[1.8fr_1fr_1fr_0.7fr] gap-1 items-center text-gray-400 text-[11px] font-medium pb-2">
+                <span />
+                <span className="text-center whitespace-nowrap" style={{ color: color.stroke }}>
+                  <span className="inline-flex items-center justify-center gap-1">{Number(prevRm)}월 <ArrowRight size={11} strokeWidth={2} /></span>
+                </span>
+                <span className="text-center whitespace-nowrap" style={{ color: color.stroke }}>{Number(rm)}월</span>
+                <span className="text-center">변화</span>
+              </div>
+              {categories.map(c => {
+                const prev = prevRpt.avg[c.key];
+                const cur = rpt.avg[c.key];
+                const diff = +(cur - prev).toFixed(2);
+                return (
+                  <div key={c.key} className="grid grid-cols-[1.8fr_1fr_1fr_0.7fr] gap-1 items-center py-2.5 border-t border-gray-100">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <img src={c.iconImg} alt={c.label} className="flex-shrink-0 w-7 h-7 rounded-full" />
+                      <div className="min-w-0">
+                        <div className="font-semibold text-gray-700 text-xs whitespace-nowrap">{c.label}</div>
+                      </div>
+                    </div>
+                    <div className="text-center">
+                      <StarDisplay value={prev} color="#f59e0b" />
+                      <div className="text-[10px] text-gray-400 mt-0.5">{prev.toFixed(2)}/5</div>
+                    </div>
+                    <div className="text-center">
+                      <StarDisplay value={cur} color="#f59e0b" />
+                      <div className="text-[10px] text-gray-400 mt-0.5">{cur.toFixed(2)}/5</div>
+                    </div>
+                    <div className="text-center font-semibold text-xs whitespace-nowrap" style={{ color: diff > 0 ? "#16a34a" : diff < 0 ? "#dc2626" : "#9ca3af" }}>
+                      {diff > 0 ? "▲" : diff < 0 ? "▼" : "-"}{diff !== 0 ? ` ${Math.abs(diff).toFixed(2)}` : ""}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           )}
-          <button onClick={() => setView("lessons")} className="w-full py-3 rounded-xl text-white font-semibold text-sm" style={{ background: color.stroke }}>
-            ‹ 기록 목록으로
-          </button>
+
+          <p className="text-center text-xs text-gray-400">🏆 꾸준한 학습이 가장 큰 성과입니다. 앞으로도 함께 화이팅해요! 💙</p>
         </div>
       </div>
     );
@@ -538,7 +647,9 @@ export default function App() {
         <div className="max-w-lg mx-auto">
           <button onClick={() => setView("list")} className="text-sm text-gray-500 mb-4 hover:text-gray-700">‹ 학생 목록</button>
           <div className="text-center mb-4">
-            <Logo width={160} />
+            <div className="inline-block bg-white rounded-full shadow-sm px-8 py-5">
+              <Logo width={160} />
+            </div>
             <div className="text-3xl my-1">🇰🇷</div>
             <h2 className="text-xl font-bold text-gray-800">{selected}</h2>
             <p className="text-gray-400 text-sm">{month.replace("-", "년 ")}월</p>
@@ -606,7 +717,9 @@ export default function App() {
         <div className="max-w-lg mx-auto">
           <button onClick={() => setView("form")} className="text-sm text-gray-500 mb-4 hover:text-gray-700">‹ 평가 입력</button>
           <div className="text-center mb-5">
-            <Logo width={160} />
+            <div className="inline-block bg-white rounded-full shadow-sm px-8 py-5">
+              <Logo width={160} />
+            </div>
             <div className="text-3xl my-1">🇰🇷</div>
             <h2 className="text-xl font-bold text-gray-800">{selected}</h2>
             <p className="text-gray-400 text-sm">월별 성장 기록</p>
@@ -684,7 +797,9 @@ export default function App() {
       <div className="max-w-lg mx-auto">
         <button onClick={() => setView("form")} className="text-sm text-gray-500 mb-4 hover:text-gray-700">‹ 평가 수정</button>
         <div className="text-center mb-5">
-          <Logo width={160} />
+          <div className="inline-block bg-white rounded-full shadow-sm px-8 py-5">
+            <Logo width={160} />
+          </div>
           <div className="text-3xl my-1">🇰🇷</div>
           <h2 className="text-xl font-bold text-gray-800">{selected}</h2>
           <p className="text-gray-400 text-sm">{year}년 {mon}월 월말 피드백</p>
